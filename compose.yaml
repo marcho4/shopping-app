@@ -1,0 +1,161 @@
+services:
+  # payments:
+  #   build:
+  #     context: ./payments
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8001:8001"
+  #   networks:
+  #     - main
+  #   env_file:
+  #     - .env
+  #   restart: always
+
+  # orders:
+  #   build:
+  #     context: ./orders
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8002:8002"
+  #   networks:
+  #     - main
+  #   env_file:
+  #     - .env
+  #   restart: always
+
+  # gateway:
+  #   build:
+  #     context: ./gateway
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8000:8000"
+  #   networks:
+  #     - main
+  #   env_file:
+  #     - .env
+  #   restart: always
+
+  # interface:
+  #   build:
+  #     context: ./interface
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - main
+  #   env_file:
+  #     - .env
+  #   restart: always
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka
+    restart: always
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+      - "9093:9093"     
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ENABLE_IDEMPOTENCE: "true"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      
+      # Контроллеру нужен listener с именем CONTROLLER
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+
+      # Определяем все listener'ы, включая CONTROLLER
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093
+
+      # Рекламируемые адреса: для внешних клиентов PLAINTEXT – localhost,
+      # для внутренних контейнеров INTERNAL и CONTROLLER – имя контейнера
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,INTERNAL://kafka:29092
+
+      # Назначаем security protocol для каждого listener
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+
+      # Указываем, какой listener использовать для межброкерской коммуникации
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+      # Дополнительные параметры (настройки хранения, репликации и т.д.)
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_RETENTION_BYTES: 10737418240
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 3000
+      KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE: "false"
+      CLUSTER_ID: "p1Q2a3B4c5D6e7F8g9H0iJ"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    networks:
+      - main
+
+  payment-postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: ${POSTGRES_PAYMENTS_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PAYMENTS_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_PAYMENTS_DB}
+    ports:
+      - "5432:5432"
+    networks:
+      - main
+    volumes:
+      - payments_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      retries: 5
+      timeout: 3s
+    restart: always
+
+  orders-postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: ${POSTGRES_ORDERS_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_ORDERS_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_ORDERS_DB}
+    ports:
+      - "5433:5432" 
+    networks:
+      - main
+    volumes:
+      - orders_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      retries: 5
+      timeout: 3s
+    restart: always
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: "Kafka Cluster"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka:29092"
+    depends_on:
+      - kafka
+    networks:
+      - main
+
+volumes:
+  orders_data:
+    driver: local
+  payments_data:
+    driver: local
+  kafka_data:
+    driver: local
+
+networks:
+  main:
+    driver: bridge
