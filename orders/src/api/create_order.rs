@@ -14,7 +14,7 @@ use crate::services::dto::create_order_dto::CreateOrderDTO;
     request_body = CreateOrderDTO,
     responses(
         (status = 200, description = "Заказ успешно создан", body = Order),
-        (status = 500, description = "Ошибка при создании заказа", body = ErrorResponse, example = json!({"error": "Ошибка", "message": "Ошибка при создании заказа"}))
+        (status = 500, description = "Ошибка при создании заказа", body = ErrorResponse)
     )
 )]
 #[post("")]

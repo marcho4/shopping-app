@@ -19,8 +19,14 @@ pub struct KafkaRepo {
 }
 
 impl KafkaRepo {
-    pub fn new(kafka_url: String, kafka_port: String) -> Self {
-        let broker = kafka_url + ":" + &kafka_port;
+    pub fn new() -> Self {
+        dotenv::dotenv().ok();
+        
+        let kafka_host = dotenv::var("KAFKA_HOST").expect("KAFKA_HOST must be set");
+        let kafka_port = dotenv::var("KAFKA_PORT").expect("KAFKA_PORT must be set");
+        info!("Kafka host: {}, port: {}", kafka_host, kafka_port);
+
+        let broker = kafka_host + ":" + &kafka_port;
         let group_id = "orders_consumers";
 
         let producer: FutureProducer = ClientConfig::new()

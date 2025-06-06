@@ -5,27 +5,27 @@ use crate::services::orders_service::OrdersService;
 
 #[utoipa::path(
     get,
-    path="/orders/{id}",
+    path="/orders/user/{user_id}",
     description="Получить заказы для пользователя с id",
     summary="Получить заказы",
     tag="Orders",
     params(
-        ("id" = i32, description = "ID пользователя в системе"),
+        ("user_id" = i32, description = "ID пользователя в системе"),
     ),
     responses(
         (status = 200, description = "Заказы успешно получены", body = Vec<Order>),
         (status = 500, description = "Ошибка при получении заказов", body = ErrorResponse, example = json!({"error": "Ошибка", "message": "Ошибка при получении заказов"}))
     )
 )]
-#[get("/{id}")]
+#[get("/user/{user_id}")]
 pub async fn get_orders(
-    id: web::Path<i32>,
+    user_id: web::Path<i32>,
     service: web::Data<OrdersService>
 ) -> impl Responder {
-    let id = id.into_inner();
+    let user_id = user_id.into_inner();
     let service = service.into_inner().clone();
     
-    match service.get_orders(id).await {
+    match service.get_orders(user_id).await {
         Ok(orders) => HttpResponse::Ok().json(orders),
         Err(e) => HttpResponse::InternalServerError().json(ErrorResponse{
             error: e.to_string(),

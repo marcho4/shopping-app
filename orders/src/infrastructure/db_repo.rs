@@ -1,18 +1,44 @@
 use std::sync::Arc;
 use sqlx::{Error, FromRow, Pool, Postgres, Row, Transaction};
+use sqlx::migrate::Migrator;
+use sqlx::postgres::PgPoolOptions;
 use uuid::Uuid;
 use crate::models::order::Order;
 use crate::models::order_status::OrderStatus;
 use crate::models::outbox_status::OutboxStatus;
 use crate::models::outbox_task::OutboxTask;
 
+static MIGRATOR: Migrator = sqlx::migrate!("src/migrations");
+
 pub struct DbRepo {
     pool: Arc<Pool<Postgres>>
 }
 
 impl DbRepo {
-    pub fn new(pool: Arc<Pool<Postgres>>) -> Self {
+    pub async fn new() -> Self {
+        dotenv::dotenv().ok();
+        
+        let db_user = dotenv::var("POSTGRES_ORDERS_USER"    ).expect("POSTGRES_ORDERS_USER must be set");
+        let db_pass = dotenv::var("POSTGRES_ORDERS_PASSWORD").expect("POSTGRES_ORDERS_PASSWORD must be set");
+        let db_name = dotenv::var("POSTGRES_ORDERS_DB"      ).expect("POSTGRES_ORDERS_DB must be set");
+        let db_host = dotenv::var("POSTGRES_ORDERS_HOST"    ).expect("POSTGRES_ORDERS_HOST must be set");
+        let db_port = dotenv::var("POSTGRES_ORDERS_PORT"    ).expect("POSTGRES_ORDERS_PORT must be set");
+
+        let pool = PgPoolOptions::new()
+            .max_connections(1)
+            .connect(format!("postgres://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}").as_str()).await;
+
+        let pool = match pool {
+            Ok(pool) => Arc::new(pool),
+            Err(e) => panic!("{}", e.to_string())
+        };
+        
         Self { pool }
+    }
+    
+    pub async fn run_migrations(&self) {
+        MIGRATOR.run(&*self.pool).await.unwrap();
+        println!("Database migrations completed");
     }
     
     pub fn get_pool(&self) -> Arc<Pool<Postgres>> {

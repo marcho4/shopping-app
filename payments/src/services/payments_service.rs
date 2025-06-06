@@ -56,12 +56,10 @@ impl PaymentsService {
     
     // обработка полученного задания на оплату заказа
     async fn process_inbox_task(&self, task: InboxTask) -> Result<(), MyError> {
-        info!("process inbox task: {:?}", task);
         match self.db.get_users_account(task.payload.0.user_id).await {
             Ok(account) => {
                 if account.is_none() {
                     // в одной транзакции создаем апдейт и помечаем задание как обработанное
-                    info!("No accounts found");
                     let mut tx = self.db.get_pool()
                         .begin()
                         .await
@@ -77,11 +75,9 @@ impl PaymentsService {
 
                 let account = account.unwrap();
                 let money_to_pay = task.payload.0.amount * task.payload.0.product_price;
-                info!("money to pay: {:?}", money_to_pay);
                 if account.balance < money_to_pay {
                     // если денег не хватает, то 
                     // в одной транзакции создаем апдейт и помечаем задание как обработанное
-                    info!("Not enough money to pay");
                     let mut tx = self.db.get_pool().begin().await.map_err(|e| MyError(e.to_string()))?;
                     
                     let _ = self.db.update_inbox_task_status(task.id, InboxStatus::Processed, &mut tx).await.map_err(|e| MyError(e.to_string()))?;
@@ -95,15 +91,12 @@ impl PaymentsService {
 
                 let _ = self.db.update_inbox_task_status(task.id, InboxStatus::Processed, &mut tx)
                     .await.map_err(|e| MyError(e.to_string()))?;
-                info!("updated inbox");
                 
                 let _ = self.db.pay_for_order(account.id, money_to_pay, &mut tx)
                     .await.map_err(|e| MyError(e.to_string()))?;
-                info!("paid");
                 
                 let _ = self.db.create_outbox_update(task.order_id, OrderStatus::Approved, &mut tx)
                     .await.map_err(|e| MyError(e.to_string()))?;
-                info!("created outbox");
                 
                 tx.commit().await.map_err(|e| MyError(e.to_string()))?;
 

@@ -16,8 +16,8 @@ use crate::services::payments_service::PaymentsService;
     ),
     responses(
         (status = 200, description = "Счета пользователя успешно получены", body = BankAccount),
-        (status = 404, description = "Счет пользователя не найден", body = ErrorResponse, example = json!({"error": "Счет не найден", "message": "Счет не найден"})),
-        (status = 500, description = "Ошибка получения счетов пользователя", body = ErrorResponse, example = json!({ "message": "Ошибка при получении счетов пользователя"}))
+        (status = 404, description = "Счет пользователя не найден", body = ErrorResponse),
+        (status = 500, description = "Ошибка получения счетов пользователя", body = ErrorResponse)
     ),
 )]
 #[get("/accounts/{id}")]
@@ -32,6 +32,7 @@ pub async fn get_user_accounts(
             match account {
                 Some(account) => HttpResponse::Ok().json(account),
                 None => HttpResponse::NotFound().json(json!({
+                    "error": "Account not found",
                     "message": "Account not found"
                 }))
             }

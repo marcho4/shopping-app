@@ -1,39 +1,37 @@
 services:
-  # payments:
-  #   build:
-  #     context: ./payments
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8001:8001"
-  #   networks:
-  #     - main
-  #   env_file:
-  #     - .env
-  #   restart: always
+  payments:
+    build:
+      context: ./payments
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    networks:
+      - main
+    env_file:
+      - .env
 
-  # orders:
-  #   build:
-  #     context: ./orders
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8002:8002"
-  #   networks:
-  #     - main
-  #   env_file:
-  #     - .env
-  #   restart: always
+  orders:
+    build:
+      context: ./orders
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    networks:
+      - main
+    env_file:
+      - .env
 
-  # gateway:
-  #   build:
-  #     context: ./gateway
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8000:8000"
-  #   networks:
-  #     - main
-  #   env_file:
-  #     - .env
-  #   restart: always
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - main
+    env_file:
+      - .env
+
 
   # interface:
   #   build:

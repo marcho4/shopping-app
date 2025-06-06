@@ -16,6 +16,7 @@ use futures::StreamExt;
 use tokio::time::sleep;
 use crate::models::order_update::OrderUpdate;
 
+#[derive(Clone)]
 pub struct OrdersService {
     db: Arc<DbRepo>,
     kafka: Arc<KafkaRepo>
@@ -56,9 +57,9 @@ impl OrdersService {
         Ok(orders)
     }
     
-    pub async fn sender_worker(&self) {
+    async fn sender_worker(&self) {
         loop {
-            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+            tokio::time::sleep(Duration::from_secs(1)).await;
             
             let mut tasks = match self.db.get_pending_tasks().await {
                 Ok(tasks) => tasks,
@@ -81,7 +82,24 @@ impl OrdersService {
         }
     }
 
-    pub async fn update_reader_worker(&self) {
+    pub async fn run_workers(&self) {
+
+        {
+            let srv = self.clone();
+            tokio::spawn(async move {
+                srv.update_reader_worker().await;
+            });
+        }
+
+        {
+            let srv = self.clone();
+            tokio::spawn(async move {
+                srv.sender_worker().await;
+            });
+        }
+
+    }
+    async fn update_reader_worker(&self) {
         let consumer = self.kafka.get_consumer();
         let mut map: HashMap<String, usize> = HashMap::new();
 

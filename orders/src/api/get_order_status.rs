@@ -3,6 +3,7 @@ use serde_json::json;
 use uuid::Uuid;
 use crate::models::error_respose::ErrorResponse;
 use crate::models::order_status::OrderStatus;
+use crate::services::dto::order_status_dto::OrderStatusDto;
 use crate::services::orders_service::OrdersService;
 
 
@@ -27,9 +28,8 @@ pub async fn get_order_status(
 ) -> impl Responder {
     let order_id = url_params.into_inner();
     
-    
     match service.get_order_status(order_id).await {
-        Ok(status) => HttpResponse::Ok().json(status),
+        Ok(status) => HttpResponse::Ok().json(OrderStatusDto { status }),
         Err(e) => {
             HttpResponse::InternalServerError().json(json!({
                 "error": e.to_string(),
