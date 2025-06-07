@@ -1,7 +1,7 @@
-use actix_web::{web, get, HttpResponse, Responder};
+use actix_web::{web, get, HttpResponse, Responder, http::StatusCode};
 use uuid::Uuid;
 use crate::models::error_response::ErrorResponse;
-use crate::models::order_status::OrderStatus;
+use crate::services::dto::order_status_dto::OrderStatusDto;
 use crate::services::gateway::Gateway;
 
 
@@ -15,7 +15,8 @@ use crate::services::gateway::Gateway;
         ("order_id" = Uuid, description = "ID заказа в системе"),
     ),
     responses(
-        (status = 200, description = "Статус заказа успешно получен", body = OrderStatus),
+        (status = 200, description = "Статус заказа успешно получен", body = OrderStatusDto),
+        (status = 404, description = "Заказ не найден", body = ErrorResponse),
         (status = 500, description = "Ошибка получения статуса заказа", body = ErrorResponse)
     ),
 )]
@@ -27,9 +28,9 @@ pub async fn get_order_status(
     let order_id = order_id.into_inner();
     
     match service.get_order_status(order_id).await {
-        Ok(status) => HttpResponse::Ok().json(status),
+        Ok((status, status_code)) => HttpResponse::build(StatusCode::from_u16(status_code).unwrap()).json(status),
         Err(e) => {
-            HttpResponse::InternalServerError().json(ErrorResponse{
+            HttpResponse::build(StatusCode::from_u16(e.1).unwrap()).json(ErrorResponse{
                 error: e.to_string(),
                 message: "Service could not get order status".to_string()
             })

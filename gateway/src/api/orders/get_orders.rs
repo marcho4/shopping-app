@@ -1,4 +1,4 @@
-use actix_web::{get, web, HttpResponse, Responder};
+use actix_web::{get, web, HttpResponse, Responder, http::StatusCode};
 use crate::models::error_response::ErrorResponse;
 use crate::models::order::Order;
 use crate::services::gateway::Gateway;  
@@ -26,8 +26,8 @@ pub async fn get_orders(
     let service = service.into_inner().clone();
     
     match service.get_orders(user_id).await {
-        Ok(orders) => HttpResponse::Ok().json(orders),
-        Err(e) => HttpResponse::InternalServerError().json(ErrorResponse{
+        Ok((orders, status_code)) => HttpResponse::build(StatusCode::from_u16(status_code).unwrap()).json(orders),
+        Err(e) => HttpResponse::build(StatusCode::from_u16(e.1).unwrap()).json(ErrorResponse{
             error: e.to_string(),
             message: "Error while getting orders".to_string()
         })

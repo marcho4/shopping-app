@@ -1,3 +1,4 @@
+use actix_web::http::StatusCode;
 use actix_web::{post, web, HttpResponse, Responder};
 use utoipa;
 use crate::models::error_response::ErrorResponse;
@@ -26,8 +27,8 @@ pub async fn create_order(
     let service = service.into_inner().clone();
     
     match service.create_order(order).await {
-        Ok(order) => HttpResponse::Ok().json(order),
-        Err(e) => HttpResponse::InternalServerError().json(ErrorResponse{
+        Ok((order, status)) => HttpResponse::build(StatusCode::from_u16(status).unwrap()).json(order),
+        Err(e) => HttpResponse::build(StatusCode::from_u16(e.1).unwrap()).json(ErrorResponse{
             error: e.to_string(),
             message: "Error while creating order".to_string()
         })

@@ -1,5 +1,4 @@
-use actix_web::{web, get, HttpResponse, Responder};
-use serde_json::json;
+use actix_web::{web, get, HttpResponse, Responder, http::StatusCode};
 use uuid::Uuid;
 use crate::models::error_response::ErrorResponse;
 use crate::services::gateway::Gateway;
@@ -16,7 +15,8 @@ use crate::services::dto::balance_dto::BalanceDTO;
     ),
     responses(
         (status = 200, description = "Баланс счета успешно получен", body = BalanceDTO),
-        (status = 500, description = "Ошибка получения статуса заказа", body = ErrorResponse, example = json!({"error": "Ошибка", "message": "Ошибка при получении статуса заказа"}))
+        (status = 404, description = "Счет не найден", body = ErrorResponse),
+        (status = 500, description = "Ошибка получения статуса заказа", body = ErrorResponse)
     ),
 )]
 #[get("/balance/{account_id}")]
@@ -27,12 +27,10 @@ pub async fn get_account_balance(
     let account_id = account_id.into_inner();
     
     match service.get_account_balance(account_id).await {
-        Ok(balance) => HttpResponse::Ok().json(balance),
-        Err(e) => {
-            HttpResponse::InternalServerError().json(json!({
-                "error": e.to_string(),
-                "message": "Service could not get account balance"
-            }))
-        }
+        Ok((balance, status_code)) => HttpResponse::build(StatusCode::from_u16(status_code).unwrap()).json(balance),
+        Err(e) => HttpResponse::build(StatusCode::from_u16(e.1).unwrap()).json(ErrorResponse{
+            error: e.to_string(),
+            message: "Service could not get account balance".to_string()
+        })
     }
 }

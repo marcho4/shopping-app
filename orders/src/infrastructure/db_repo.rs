@@ -87,20 +87,19 @@ impl DbRepo {
         Ok(OutboxTask::from_row(&query)?)
     }
 
-    pub async fn get_order_status(&self, order_id: Uuid) -> Result<OrderStatus, Error> {
+    pub async fn get_order_status(&self, order_id: Uuid) -> Result<Option<OrderStatus>, Error> {
         let res = sqlx::query("SELECT status FROM orders WHERE id = $1")
             .bind(order_id)
-            .fetch_one(self.pool.as_ref())
+            .fetch_optional(self.pool.as_ref())
             .await?;
         
-        if res.is_empty() {
-            return Err(Error::RowNotFound);
+        if res.is_none() {
+            return Ok(None);
         }
         
-        let order_status: OrderStatus = res.get("status");
-        // let real_user_id: i32 = res.get("user_id");
+        let order_status: OrderStatus = res.unwrap().get("status");
         
-        Ok(order_status)
+        Ok(Some(order_status))
     }
     
     pub async fn create_order(

@@ -3,9 +3,9 @@ use utoipa::ToSchema;
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct CreateOrderDTO {
-    pub product_id: i32,
-    pub user_id: i32,
-    pub amount: i32,
+    pub product_id: u32,
+    pub user_id: u32,
+    pub amount: u32,
     pub description: String,
-    pub product_price: i32
+    pub product_price: u32
 }

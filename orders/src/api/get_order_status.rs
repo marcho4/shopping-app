@@ -18,6 +18,7 @@ use crate::services::orders_service::OrdersService;
     ),
     responses(
         (status = 200, description = "Статус заказа успешно получен", body = OrderStatus),
+        (status = 404, description = "Заказ не найден", body = ErrorResponse, example = json!({"error": "Order not found", "message": "Order not found"})),
         (status = 500, description = "Ошибка получения статуса заказа", body = ErrorResponse, example = json!({"error": "Ошибка", "message": "Ошибка при получении статуса заказа"}))
     ),
 )]
@@ -31,6 +32,12 @@ pub async fn get_order_status(
     match service.get_order_status(order_id).await {
         Ok(status) => HttpResponse::Ok().json(OrderStatusDto { status }),
         Err(e) => {
+            if e.to_string() == "Order not found" {
+                return HttpResponse::NotFound().json(json!({
+                    "error": e.to_string(),
+                    "message": "Order not found"
+                }));
+            }
             HttpResponse::InternalServerError().json(json!({
                 "error": e.to_string(),
                 "message": "Service could not get order status"

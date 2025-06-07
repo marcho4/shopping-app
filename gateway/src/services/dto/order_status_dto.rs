@@ -1,7 +1,7 @@
 use crate::models::order_status::OrderStatus;   
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, utoipa::ToSchema)]
 pub struct OrderStatusDto {
     pub status: OrderStatus,
 }

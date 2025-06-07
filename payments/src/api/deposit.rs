@@ -1,6 +1,5 @@
 use actix_web::{put, web, HttpResponse, Responder};
 use crate::models::error_respose::ErrorResponse;
-use crate::models::bank_account::BankAccount;
 use crate::services::dto::balance_dto::BalanceDTO;
 use crate::services::payments_service::PaymentsService;
 use crate::services::dto::deposit_dto::DepositDTO;
@@ -29,9 +28,18 @@ pub async fn deposit(
         Ok(balance) => HttpResponse::Ok().json(BalanceDTO{
             balance
         }),
-        Err(e) => HttpResponse::InternalServerError().json(ErrorResponse{
-            error: e.to_string(),
-            message: "Error while depositing".to_string()
-        })
+        Err(e) => {
+            if e.to_string() == "Account not found" {
+                HttpResponse::NotFound().json(ErrorResponse{
+                    error: e.to_string(),
+                    message: "Account not found".to_string()
+                })
+            } else {
+                HttpResponse::InternalServerError().json(ErrorResponse{
+                    error: e.to_string(),
+                    message: "Error while depositing".to_string()
+                })
+            }
+        }
     }
 }

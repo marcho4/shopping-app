@@ -1,4 +1,4 @@
-import { OrderStatus } from "./order_status";
+import { OrderStatus } from "@/lib";
 
 export interface Order {
     id: string,
@@ -9,3 +9,5 @@ export interface Order {
     description: string,
     status: OrderStatus
 }
+
+export { OrderStatus };

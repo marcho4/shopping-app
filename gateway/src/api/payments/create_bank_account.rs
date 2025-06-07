@@ -1,4 +1,4 @@
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{post, web, HttpResponse, Responder, http::StatusCode        };
 use utoipa;
 use crate::models::error_response::ErrorResponse;
 use crate::models::bank_account::BankAccount;
@@ -26,8 +26,8 @@ pub async fn create_bank_account(
     let service = service.into_inner().clone();
     
     match service.create_bank_account(payment).await {
-        Ok(payment) => HttpResponse::Ok().json(payment),
-        Err(e) => HttpResponse::InternalServerError().json(ErrorResponse{
+        Ok((payment, status_code)) => HttpResponse::build(StatusCode::from_u16(status_code).unwrap()).json(payment),
+        Err(e) => HttpResponse::build(StatusCode::from_u16(e.1).unwrap()).json(ErrorResponse{
             error: e.to_string(),
             message: "Error while creating payment".to_string()
         })

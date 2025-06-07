@@ -38,10 +38,17 @@ pub async fn get_user_accounts(
             }
         },
         Err(e) => {
-            HttpResponse::InternalServerError().json(json!({
-                "error": e.to_string(),
-                "message": "Service could not get user account"
-            }))
+            if e.to_string() == "Account not found" {
+                HttpResponse::NotFound().json(json!({
+                    "error": e.to_string(),
+                    "message": "Account not found"
+                }))
+            } else {
+                HttpResponse::InternalServerError().json(json!({
+                    "error": e.to_string(),
+                    "message": "Service could not get user account"
+                }))
+            }
         }
     }
 }

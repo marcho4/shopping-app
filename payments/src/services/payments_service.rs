@@ -32,13 +32,20 @@ impl PaymentsService {
         let balance = self.db.deposit(payment.account_id, payment.amount)
             .await
             .map_err(|e| MyError(e.to_string()))?;
-        Ok(balance)
+        match balance {
+            Some(balance) => Ok(balance),
+            None => Err(MyError("Account not found".to_string()))
+        }
     }
+
     pub async fn get_account_balance(&self, account_id: Uuid) -> Result<BalanceDTO, MyError> {
         let balance = self.db.get_account_balance(account_id)
             .await
             .map_err(|e| MyError(e.to_string()))?;
-        Ok(BalanceDTO { balance })
+        match balance {
+            Some(balance) => Ok(BalanceDTO { balance }),
+            None => Err(MyError("Account not found".to_string()))
+        }
     }
     pub async fn get_users_account(&self, user_id: i32) -> Result<Option<BankAccount>, MyError> {
         let account = self.db.get_users_account(user_id)

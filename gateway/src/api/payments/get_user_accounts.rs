@@ -1,4 +1,4 @@
-use actix_web::{web, get, HttpResponse, Responder};
+use actix_web::{web, get, HttpResponse, Responder, http::StatusCode};
 use crate::models::bank_account::BankAccount;
 use crate::models::error_response::ErrorResponse;
 use crate::services::gateway::Gateway;
@@ -10,7 +10,7 @@ use crate::services::gateway::Gateway;
     summary="Получить все счета пользователя",
     tag="Payments",
     params(
-        ("user_id" = i32, description = "ID пользователя в системе"),
+        ("user_id" = u32, description = "ID пользователя в системе"),
     ),
     responses(
         (status = 200, description = "Счета пользователя успешно получены", body = BankAccount),
@@ -20,20 +20,16 @@ use crate::services::gateway::Gateway;
 )]
 #[get("/accounts/{user_id}")]
 pub async fn get_user_accounts(
-    user_id: web::Path<i32>,
+    user_id: web::Path<u32>,
     service: web::Data<Gateway>,
 ) -> impl Responder {
     let user_id = user_id.into_inner();
     
-    match service.get_user_account(user_id).await {
-        Ok(account) => {
-            HttpResponse::Ok().json(account)
-        },
-        Err(e) => {
-            HttpResponse::InternalServerError().json(ErrorResponse{
+    match service.get_user_account(user_id as i32).await {
+        Ok((account, status_code)) => HttpResponse::build(StatusCode::from_u16(status_code).unwrap()).json(account),
+        Err(e) => HttpResponse::build(StatusCode::from_u16(e.1).unwrap()).json(ErrorResponse{
                 error: e.to_string(),
                 message: "Service could not get user account".to_string()
-            })
-        }
+        })
     }
 }

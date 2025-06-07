@@ -22,17 +22,5 @@ export const PRODUCTS = [
         name: "Rolex",
         description: "Rolex - это взорванные часы",
         price: 3999990
-    },
-    {
-        id: 5,
-        name: "iPhone 16",
-        description: "iPhone 16 не нуждается в описании",
-        price: 99999
-    },
-    {
-        id: 6,
-        name: "Доширак",
-        description: "Лапшичка вкусная",
-        price: 20
-    }   
+    } 
 ]

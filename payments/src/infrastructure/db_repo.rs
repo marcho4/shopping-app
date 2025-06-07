@@ -61,21 +61,28 @@ impl DbRepo {
         Ok(query.into_iter().map(|row| InboxTask::from_row(&row)).collect::<Result<_, _>>()?)
     }
     
-    pub async fn get_account_balance(&self, account_id: Uuid) -> Result<i32, Error> {
+    pub async fn get_account_balance(&self, account_id: Uuid) -> Result<Option<i32>, Error> {
         let query = sqlx::query("SELECT balance FROM bank_accounts WHERE id = $1")
             .bind(account_id)
-            .fetch_one(self.pool.as_ref())
+            .fetch_optional(self.pool.as_ref())
             .await?;
-        Ok(query.get("balance"))
+        match query {
+            Some(row) => Ok(Some(row.get("balance"))),
+            None => Ok(None)
+        }
     }
 
-    pub async fn deposit(&self, account_id: Uuid, amount: i32) -> Result<i32, Error> {
+    pub async fn deposit(&self, account_id: Uuid, amount: i32) -> Result<Option<i32>, Error> {
         let query = sqlx::query("UPDATE bank_accounts SET balance = balance + $1 WHERE id = $2 RETURNING balance")
             .bind(amount)
             .bind(account_id)
-            .fetch_one(self.pool.as_ref())
+            .fetch_optional(self.pool.as_ref())
             .await?;
-        Ok(query.get("balance"))
+
+        match query {
+            Some(row) => Ok(Some(row.get("balance"))),
+            None => Ok(None)
+        }
     }
     
     pub async fn get_users_account(&self, user_id: i32) -> Result<Option<BankAccount>, Error> {

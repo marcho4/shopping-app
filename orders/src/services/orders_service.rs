@@ -29,9 +29,13 @@ impl OrdersService {
     
     pub async fn get_order_status(&self, order_id: Uuid) -> Result<OrderStatus, MyError> {
         let order = self.db.get_order_status(order_id)
-            .await
-            .map_err(|e| MyError(e.to_string()))?;
-        Ok(order)
+            .await;
+
+        match order {
+            Ok(Some(status)) => Ok(status),
+            Ok(None) => Err(MyError("Order not found".to_string())),
+            Err(e) => Err(MyError(e.to_string()))
+        }
     }
     
     pub async fn create_order(&self, order: &CreateOrderDTO) -> Result<Order, MyError> {
