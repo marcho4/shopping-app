@@ -59,25 +59,17 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_ENABLE_IDEMPOTENCE: "true"
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-      
-      # Контроллеру нужен listener с именем CONTROLLER
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
 
-      # Определяем все listener'ы, включая CONTROLLER
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093
 
-      # Рекламируемые адреса: для внешних клиентов PLAINTEXT – localhost,
-      # для внутренних контейнеров INTERNAL и CONTROLLER – имя контейнера
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,INTERNAL://kafka:29092
 
-      # Назначаем security protocol для каждого listener
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
 
-      # Указываем, какой listener использовать для межброкерской коммуникации
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
 
-      # Дополнительные параметры (настройки хранения, репликации и т.д.)
       KAFKA_LOG_DIRS: /var/lib/kafka/data
       KAFKA_LOG_RETENTION_HOURS: 168
       KAFKA_LOG_RETENTION_BYTES: 10737418240
