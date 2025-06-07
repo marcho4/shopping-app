@@ -33,17 +33,17 @@ services:
       - .env
 
 
-  # interface:
-  #   build:
-  #     context: ./interface
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "3000:3000"
-  #   networks:
-  #     - main
-  #   env_file:
-  #     - .env
-  #   restart: always
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      - main
+    environment:
+      - API_URL=http://gateway:8000
+    restart: always
 
   kafka:
     image: confluentinc/cp-kafka:7.4.0

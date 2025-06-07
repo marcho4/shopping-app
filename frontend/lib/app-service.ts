@@ -15,10 +15,10 @@ import {
 const getApiBaseUrl = () => {
     // Server-side (SSR, API routes)
     if (typeof window === 'undefined') {
-        return process.env.API_URL || 'http://backend:8000';
+        return process.env.API_URL || 'http://gateway:8000';
     }
     // Client-side (браузер)
-    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    return process.env.NEXT_PUBLIC_API_URL || 'http://gateway:8000';
 };
 
 const API_BASE_URL = getApiBaseUrl();

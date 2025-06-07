@@ -319,6 +319,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.98"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e16d2d3311acee920a9eb8d33b8cbc1787ce4a264e85f964c2404b969bdcd487"
+
+[[package]]
 name = "arbitrary"
 version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -938,14 +944,17 @@ version = "0.1.0"
 dependencies = [
  "actix-multipart",
  "actix-web",
+ "anyhow",
  "dotenv",
  "env_logger",
  "log",
+ "rand 0.9.1",
  "reqwest",
  "serde",
  "serde_json",
  "sha2",
  "sqlx",
+ "tokio",
  "utoipa",
  "utoipa-swagger-ui",
  "uuid",
@@ -2723,7 +2732,19 @@ dependencies = [
  "pin-project-lite",
  "signal-hook-registry",
  "socket2",
+ "tokio-macros",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "tokio-macros"
+version = "2.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e06d43f1345a3bcd39f6a56dbb7dcab2ba47e68e8ac134855e7e2bdbaf8cab8"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
