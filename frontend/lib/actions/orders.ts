@@ -4,15 +4,11 @@ import { createOrder, getUserOrders, getOrderStatus } from "@/lib/app-service";
 import { CreateOrderDTO } from "@/lib/models/dto";
 import { revalidatePath } from "next/cache";
 
-/**
- * Server Action для создания заказа
- */
 export async function createOrderAction(orderData: CreateOrderDTO) {
     try {
         console.log('Creating order on server:', orderData);
         const order = await createOrder(orderData);
         
-        // Обновляем кэш страницы после создания заказа
         revalidatePath('/');
         
         return {
@@ -30,9 +26,6 @@ export async function createOrderAction(orderData: CreateOrderDTO) {
     }
 }
 
-/**
- * Server Action для получения заказов пользователя
- */
 export async function getUserOrdersAction(userId: number) {
     try {
         const orders = await getUserOrders(userId);
@@ -50,10 +43,7 @@ export async function getUserOrdersAction(userId: number) {
         };
     }
 }
-
-/**
- * Server Action для получения статуса заказа
- */
+    
 export async function getOrderStatusAction(orderId: string) {
     try {
         const status = await getOrderStatus(orderId);

@@ -9,21 +9,15 @@ import {
     ErrorResponse
 } from "@/lib/models/dto";
 
-// Базовый URL для API
-// Для server-side запросов используем внутренний URL Docker сети
-// Для client-side запросов используем публичный URL
 const getApiBaseUrl = () => {
-    // Server-side (SSR, API routes)
     if (typeof window === 'undefined') {
         return process.env.API_URL || 'http://gateway:8000';
     }
-    // Client-side (браузер)
-    return process.env.NEXT_PUBLIC_API_URL || 'http://gateway:8000';
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 };
 
 const API_BASE_URL = getApiBaseUrl();
 
-// Обработчик ошибок API
 export class ApiError extends Error {
     constructor(
         message: string,
@@ -56,7 +50,6 @@ async function apiRequest<T>(
             try {
                 errorResponse = await response.json() as ErrorResponse;
             } catch {
-                // Если не удалось парсить JSON ошибки
             }
 
             throw new ApiError(
@@ -69,10 +62,9 @@ async function apiRequest<T>(
     } catch (error) {
         console.error('API request failed:', error);
 
-        // Если это ошибка сети (fetch failed)
         if (error instanceof TypeError && error.message.includes('fetch')) {
             throw new ApiError(
-                `Не удалось подключиться к серверу по адресу ${url}. Проверьте, что backend запущен.`,
+                `Failed to connect to the server at ${url}. Please ensure the backend is running.`,
                 0
             );
         }

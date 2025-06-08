@@ -16,7 +16,6 @@ import { BankAccount } from '@/lib/models/bank_account';
 import { CreateOrderDTO, CreateAccountDTO, DepositDTO, BalanceDTO } from '@/lib/models/dto';
 import { getErrorMessage } from '../utils';
 
-// Базовый тип для состояния загрузки
 interface ApiState<T> {
     data: T | null;
     loading: boolean;
@@ -53,7 +52,6 @@ export function useUserOrders(userId: number | null) {
     return { ...state, refetch: fetchOrders };
 }
 
-// Хук для создания заказа
 export function useCreateOrder() {
     const [state, setState] = useState<ApiState<Order>>({
         data: null,
@@ -78,7 +76,6 @@ export function useCreateOrder() {
     return { ...state, createOrder: createOrderMutation };
 }
 
-// Хук для получения статуса заказа
 export function useOrderStatus(orderId: string | null) {
     const [state, setState] = useState<ApiState<OrderStatus>>({
         data: null,
@@ -109,7 +106,6 @@ export function useOrderStatus(orderId: string | null) {
     return { ...state, refetch: fetchStatus };
 }
 
-// Хук для получения счетов пользователя
 export function useUserAccounts(userId: number | null) {
     const [state, setState] = useState<ApiState<BankAccount>>({
         data: null,
@@ -139,8 +135,7 @@ export function useUserAccounts(userId: number | null) {
 
     return { ...state, refetch: fetchAccounts };
 }
-
-// Хук для создания банковского счета
+            
 export function useCreateBankAccount() {
     const [state, setState] = useState<ApiState<BankAccount>>({
         data: null,

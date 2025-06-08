@@ -1,19 +1,13 @@
-// Константы для работы с API
-
-// Эндпоинты API
 export const API_ENDPOINTS = {
-    // Orders
     ORDERS: '/orders',
     ORDER_STATUS: (orderId: string) => `/orders/status/${orderId}`,
     USER_ORDERS: (userId: number) => `/orders/${userId}`,
     
-    // Payments
     PAYMENTS: '/payments',
     USER_ACCOUNTS: (userId: number) => `/payments/accounts/${userId}`,
     ACCOUNT_BALANCE: (accountId: string) => `/payments/balance/${accountId}`,
 } as const;
 
-// HTTP методы
 export const HTTP_METHODS = {
     GET: 'GET',
     POST: 'POST',
@@ -22,7 +16,6 @@ export const HTTP_METHODS = {
     PATCH: 'PATCH',
 } as const;
 
-// Коды статусов HTTP
 export const HTTP_STATUS = {
     OK: 200,
     CREATED: 201,
@@ -33,7 +26,6 @@ export const HTTP_STATUS = {
     INTERNAL_SERVER_ERROR: 500,
 } as const;
 
-// Сообщения об ошибках по умолчанию
 export const DEFAULT_ERROR_MESSAGES = {
     NETWORK_ERROR: 'Ошибка сети. Проверьте подключение к интернету.',
     SERVER_ERROR: 'Внутренняя ошибка сервера. Попробуйте позже.',
