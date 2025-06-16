@@ -1,5 +1,6 @@
 "use client";
 
+import React from 'react';
 import { PRODUCTS } from "@/lib/constants";
 import ProductCard from "./ProductCard";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -43,11 +44,11 @@ export default function Market() {
                                         </div>
                                     )}
                                     <p className="text-lg font-medium w-full text-left text-gray-800">Итого: {total} руб.</p>
-                                    <Input placeholder={'Введите описание покупки'} onChange={(e) => setDescription(e.target.value)}/>
+                                    <Input placeholder={'Введите описание покупки'} value={description || ''} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDescription(e.target.value)}/>
                                     <Button
                                         size='icon'
                                         className="w-full"
-                                        disabled={isEmpty || isPending || description === undefined}
+                                        disabled={isEmpty || isPending || !description}
                                         onClick={async () => {
                                             if (!cartItem) return;
                                             createOrder({
